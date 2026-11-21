@@ -38,6 +38,15 @@
   html body #tabbar.tabbar .tabdot { top: 7px; right: 50%; margin-right: -16px; box-shadow: 0 0 0 2px var(--surface); }
   html body.hasnav { padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)); }
 }
+@media (max-width: 899px) {
+  /* Musique : on garde le nom « Musique » dans la pastille (jamais le titre du morceau qui défilait sur toute la barre) */
+  html body #tabbar.tabbar .tab-music .mini-t, html body #tabbar.tabbar .tab-music[aria-current="page"] span.mini-t, html body #tabbar.tabbar .tab-music:not([aria-current="page"]) span.mini-t { display: none !important; }
+  html body #tabbar.tabbar .tab-music span { font-size: 0 !important; }
+  html body #tabbar.tabbar .tab-music[aria-current="page"] span::after { content: "Musique"; font-size: .82rem; font-weight: 700; }
+  html body #tabbar.tabbar .tab { overflow: hidden !important; }
+  html body #tabbar.tabbar .tab[aria-current="page"] span { overflow: hidden; }
+  html body #tabbar.tabbar .tab-music .mini-pp, html body #tabbar.tabbar .tab-music .mini-bar { display: none !important; }
+}
 @media (prefers-reduced-motion: no-preference) and (max-width: 899px) {
   html body #tabbar.tabbar .tab[aria-current="page"] span { animation: tbLab .3s .08s both; }
   @keyframes tbLab { from { opacity: 0; transform: translateX(-6px); } }
