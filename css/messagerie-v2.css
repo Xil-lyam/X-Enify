@@ -59,3 +59,7 @@ html body #viewChat .composer .send { width: 44px; height: 44px; border-radius: 
 html body #viewChat .composer .send.mic { background: transparent; color: var(--muted); }
 html body #viewChat .composer #mic { background: var(--accent); color: var(--accent-ink); }
 @media (prefers-reduced-motion: reduce) { html body #viewList #chats .chatrow { transition: none; } }
+
+/* Logo X des en-têtes : net, sans halo gris ni contour (comme sur l'écran de connexion) */
+html body #app svg.xw, html body #viewList h1 svg.xw { filter: none !important; stroke: none !important; stroke-width: 0 !important; -webkit-filter: none !important; }
+html body #app svg.xw path { fill: var(--ink); }
