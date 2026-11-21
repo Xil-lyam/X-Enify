@@ -1,0 +1,45 @@
+/* X'enify — barre du bas : îlot flottant arrondi. Seule l'icône de la page ouverte montre son nom, dans une pastille douce
+   (plus de noms coupés « Messag… »). Chargé en dernier pour passer devant les anciens styles. */
+@media (max-width: 899px) {
+  html body #tabbar.tabbar:not([hidden]) {
+    left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); width: auto; max-width: 440px; margin: 0 auto; box-sizing: border-box;
+    padding: 6px; gap: 2px; align-items: center; justify-content: space-between;
+    border-radius: 32px; border: 1px solid color-mix(in srgb, var(--ink) 9%, transparent) !important;
+    background: color-mix(in srgb, var(--surface) 86%, transparent) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(1.5) !important; backdrop-filter: blur(22px) saturate(1.5) !important;
+    box-shadow: 0 12px 34px rgba(0,0,0,.38), inset 0 1px 0 color-mix(in srgb, var(--ink) 7%, transparent) !important;
+  }
+  html body #tabbar.tabbar .tabind { display: none !important; }
+  html body #tabbar.tabbar .tab, html body #tabbar.tabbar .tab:not([aria-current="page"]) {
+    flex: 1 1 0 !important; min-width: 0; width: auto !important; height: 46px !important; padding: 0 !important; margin: 0 !important; gap: 7px;
+    flex-direction: row; align-items: center; justify-content: center; border-radius: 24px !important;
+    background: transparent !important; box-shadow: none !important; color: var(--muted) !important;
+    transition: flex-grow .38s cubic-bezier(.3,1.2,.5,1), background .25s, color .25s, scale .2s;
+  }
+  html body #tabbar.tabbar .tab svg { width: 23px; height: 23px; flex: none; stroke: currentColor; }
+  html body #tabbar.tabbar .tab[data-t="news"]::before, html body #tabbar.tabbar .tab[data-t="create"]::before { width: 23px; height: 23px; }
+  html body #tabbar.tabbar .tab:not([aria-current="page"]) span { display: none !important; }
+  html body #tabbar.tabbar:not(#_) .tab[aria-current="page"] {
+    flex: 2.7 1 0 !important; flex-direction: row !important; color: var(--accent) !important; border-radius: 24px !important;
+    background: color-mix(in srgb, var(--accent) 19%, transparent) !important; box-shadow: none !important;
+  }
+  html body #tabbar.tabbar:not(#_) .tab[aria-current="page"][data-t="anon"] span,
+  html body #tabbar.tabbar:not(#_) .tab[aria-current="page"][data-t="news"] span,
+  html body #tabbar.tabbar:not(#_) .tab[aria-current="page"][data-t="create"] span { font-size: 0 !important; }
+  html body #tabbar.tabbar .tab[aria-current="page"] svg { stroke: var(--accent) !important; stroke-width: 2.3; }
+  html body #tabbar.tabbar .tab[aria-current="page"] span { display: block !important; flex: none; max-width: none !important; overflow: visible; color: var(--accent) !important; font-weight: 700; letter-spacing: -.005em; }
+  html body #tabbar.tabbar .tab[aria-current="page"]:not([data-t="anon"]):not([data-t="news"]):not([data-t="create"]) span { font-size: .82rem; }
+  html body #tabbar.tabbar .tab[aria-current="page"][data-t="anon"] span::after,
+  html body #tabbar.tabbar .tab[aria-current="page"][data-t="news"] span::after,
+  html body #tabbar.tabbar .tab[aria-current="page"][data-t="create"] span::after { font-size: .82rem !important; font-weight: 700; }
+  html body #tabbar.tabbar .tab:active { scale: .9; }
+  html body #tabbar.tabbar .tabbadge { top: 3px; left: calc(50% + 2px); right: auto; background: #ff3b5c !important; color: #fff !important; font-size: .66rem !important; line-height: 1; -webkit-text-fill-color: #fff; box-shadow: 0 0 0 2px var(--surface) !important; }
+  html body #tabbar.tabbar .tab[aria-current="page"] .tabbadge { display: none; }
+  html body #tabbar.tabbar .tabdot { top: 7px; right: 50%; margin-right: -16px; box-shadow: 0 0 0 2px var(--surface); }
+  html body.hasnav { padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)); }
+}
+@media (prefers-reduced-motion: no-preference) and (max-width: 899px) {
+  html body #tabbar.tabbar .tab[aria-current="page"] span { animation: tbLab .3s .08s both; }
+  @keyframes tbLab { from { opacity: 0; transform: translateX(-6px); } }
+}
+@media (prefers-reduced-motion: reduce) { html body #tabbar.tabbar .tab { transition: none; } }
