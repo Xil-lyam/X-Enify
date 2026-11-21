@@ -1,0 +1,58 @@
+/* X'enify — design v3 : une seule langue visuelle pour tout le site (chargé en dernier).
+   Plus propre (plus de traits lumineux ni de halos), plus lisible, plus rapide (moins de flou et d'ombres à dessiner). */
+:root {
+  --r-sm: 12px; --r-md: 18px; --r-lg: 24px; --r-pill: 999px;
+  --gap: 14px;
+  --hair: color-mix(in srgb, var(--ink) 9%, transparent);
+  --press: color-mix(in srgb, var(--ink) 9%, transparent);
+}
+html { -webkit-tap-highlight-color: transparent; scrollbar-width: none; }
+html *, html *::before, html *::after { -webkit-tap-highlight-color: transparent; }
+html * { scrollbar-width: none; }
+html *::-webkit-scrollbar { display: none; }
+button, a, summary, label, [role="button"], .tab, .chatrow { touch-action: manipulation; }
+
+/* ---------- En-têtes : même hauteur, fond uni, aucun trait lumineux ---------- */
+html body .screen:not(#viewList) > header::before, html body .screen:not(#viewList) > header::after { display: none !important; content: none !important; }
+html body #viewMusic > header, html body #viewNews > header, html body #viewGame > header {
+  background: var(--bg) !important; box-shadow: none !important; border-bottom: 1px solid var(--hair) !important;
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+}
+html body .screen > header { min-height: 56px; box-sizing: border-box; }
+html body .screen > header .tico, html body .screen > header .tbtn, html body .screen > header .back, html body .screen > header .ghost.back {
+  width: 42px; height: 42px; border-radius: 50%; display: inline-grid; place-items: center; transition: background .15s, scale .15s;
+}
+html body .screen > header .tico:active, html body .screen > header .back:active { background: var(--press); scale: .92; }
+
+/* ---------- Boutons : un seul gabarit ---------- */
+html body .primary { border-radius: var(--r-md); min-height: 46px; font-weight: 700; box-shadow: none; }
+html body .primary:active, html body .ghost:active { scale: .97; }
+html body .ghost { border-radius: var(--r-pill); }
+html body .field, html body input.field, html body textarea.field { border-radius: var(--r-md); }
+
+/* ---------- Boîtes de dialogue et menus : même carte arrondie, fond sombre sans flou ---------- */
+html body dialog.sheet { border-radius: var(--r-lg); border: 1px solid var(--hair); box-shadow: 0 24px 64px rgba(0,0,0,.5); }
+html body dialog::backdrop { background: rgba(0,0,0,.58); -webkit-backdrop-filter: none; backdrop-filter: none; }
+html body .mksheet, html body .kmenu { border-radius: var(--r-md); border: 1px solid var(--hair); box-shadow: 0 16px 44px rgba(0,0,0,.42); -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+/* ---------- Pas de halo ni de lueur sur le texte / les icônes ---------- */
+html body h1, html body h2, html body h3, html body .tab svg, html body .tico svg { text-shadow: none; }
+html body .tbadge, html body .tabbadge, html body .frn { box-shadow: 0 0 0 2px var(--bg); }
+
+/* ---------- Bouton rond d'action (écrire, créer) : un seul style, au-dessus de la barre ---------- */
+html body #fab, html body .fab, html body .nwfab { box-shadow: 0 8px 22px rgba(0,0,0,.35) !important; }
+
+/* ---------- Plus rapide : on ne dessine que ce qui est visible ---------- */
+html body #chats > li, html body #chats .chatrow { content-visibility: auto; contain-intrinsic-size: auto 72px; }
+html body .screen { contain: layout style; }
+@media (prefers-reduced-motion: no-preference) {
+  html body .screen:not([hidden]) { animation: v3In .18s ease-out both; }
+  @keyframes v3In { from { opacity: 0; } }
+}
+/* bouton retour : rond, transparent, même taille partout */
+html body .chathead .back, html body .screen > header .back {
+  flex: none; width: 42px; height: 42px; min-width: 42px; padding: 0; margin: 0 2px 0 -4px; border: 0 !important; border-radius: 50%;
+  background: transparent !important; box-shadow: none !important; color: var(--ink); display: inline-grid; place-items: center;
+}
+html body .chathead .back:active { background: var(--press) !important; }
+html body #viewMusic .chathead .back, html body #viewGame .chathead .back { color: var(--ink); }
