@@ -754,18 +754,47 @@ window.__uandiApp = function () {
     convUuid(c.id).then(function (u) { if (!u) throw new Error('x'); return SB.rpc('respond_invite', { p_cid: u, p_accept: yes }); })
       .then(function (r) { if (r && r.error) throw r.error; }).catch(frFail);
   }
-  function frRow(uid, name, sub, subCls, online, btns, onOpen) {
-    var r = el('div', 'frrow'), wrap = el('span', 'frav'), a = el('span', 'avatar sm');
-    paintPhoto(a, uid, name); loadPhoto(uid); ensureBadge(uid); wrap.appendChild(a);
-    if (online) wrap.appendChild(el('i', 'frdot'));
-    wrap.addEventListener('click', function () { frDlg.close(); openUserCard(uid, name); });
-    var mid = el('div', 'frmid');
-    mid.appendChild(withBadge(el('b', '', cap(name)), uid));
-    mid.appendChild(el('small', subCls || '', sub || ''));
-    mid.addEventListener('click', onOpen);
-    var bx = el('div', 'frbtns');
-    (btns || []).forEach(function (o) { var b = el('button', 'ghost', o[0]); b.type = 'button'; b.addEventListener('click', o[1]); bx.appendChild(b); });
-    r.appendChild(wrap); r.appendChild(mid); r.appendChild(bx);
+  /* page Amis (plein écran, comme Facebook) : ligne d'une personne.
+     o = { uid, name, sub, subCls, online, onMain, msg, btns: [[libellé, action, 'pri'|'']] } */
+  function frGoProfile(u, nm) {
+    frDlg.close();
+    if (window.UIProfile && UIProfile.open) UIProfile.open(u, nm); else openUserCard(u, nm);
+  }
+  function frRow(o) {
+    var card = !!(o.btns && o.btns.length), r = el('div', 'frp-row' + (card ? ' card' : ''));
+    var main = el('button', 'frp-main'); main.type = 'button';
+    var wrap = el('span', 'frp-av'), a = el('span', 'avatar');
+    paintPhoto(a, o.uid, o.name); loadPhoto(o.uid); ensureBadge(o.uid); wrap.appendChild(a);
+    if (o.online) wrap.appendChild(el('i', 'frp-dot'));
+    var mid = el('span', 'frp-mid');
+    mid.appendChild(withBadge(el('b', '', cap(o.name)), o.uid));
+    mid.appendChild(el('small', o.subCls || '', o.sub || ''));
+    if (o.extra) mid.appendChild(el('em', '', o.extra));
+    main.appendChild(wrap); main.appendChild(mid);
+    main.addEventListener('click', o.onMain || function () { frGoProfile(o.uid, o.name); });
+    r.appendChild(main);
+    if (o.msg) {
+      var m = el('button', 'frp-msg'); m.type = 'button'; m.setAttribute('aria-label', 'Écrire à ' + o.name);
+      m.innerHTML = '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>';
+      m.addEventListener('click', function () { frDlg.close(); openChat(o.uid, o.name); });
+      r.appendChild(m);
+    }
+    if (card) {
+      var bx = el('div', 'frp-acts');
+      o.btns.forEach(function (x) {
+        var b = el('button', 'frp-btn' + (x[2] ? ' ' + x[2] : ''), x[0]); b.type = 'button';
+        b.addEventListener('click', function () {
+          if (b.disabled) return;
+          bx.querySelectorAll('button').forEach(function (z) { z.disabled = true; });
+          if (x[2] === 'pri') { b.textContent = x[3] || '✓'; r.classList.add('done'); if (window.XenFx) XenFx.confetti(b); }
+          else { r.classList.add('gone'); }
+          try { navigator.vibrate && navigator.vibrate(x[2] === 'pri' ? [10, 40, 14] : 8); } catch (e) {}
+          x[1]();
+        });
+        bx.appendChild(b);
+      });
+      r.appendChild(bx);
+    }
     return r;
   }
   /* suggestions d'amis : comptes certifiés récemment actifs, sans les amis ni les demandes en cours ; les comptes non certifiés n'en voient pas */
@@ -803,70 +832,100 @@ window.__uandiApp = function () {
       if (frDlg.open) frRender();
     }).catch(function () { FR.sug.busy = false; FR.sug.t = Date.now(); });
   }
+  function frHead(box, txt, n) { var h = el('div', 'frp-h'); h.appendChild(el('h2', '', txt)); if (n != null) h.appendChild(el('span', '', String(n))); box.appendChild(h); }
+  function frEmpty(box, title, txt) { var d = el('div', 'frp-empty'); d.appendChild(el('strong', '', title)); d.appendChild(el('p', '', txt)); box.appendChild(d); }
   function frRender() {
-    var box = $('#frBody'); box.replaceChildren();
+    var box = $('#frBody'), keep = box.scrollTop; box.replaceChildren();
     var inc = frIncoming(), out = FR.list.filter(function (f) { return f.status === 'pending' && f.from === state.me; });
     var inv = state.chats.filter(invitePending).sort(function (a, b) { return (b.lastTs || 0) - (a.lastTs || 0); });
-    var friends = frAll();
-    $('#frTabReq').textContent = 'Demandes' + (frCount() ? ' (' + frCount() + ')' : '');
-    $('#frTabFr').textContent = 'Amis (' + friends.length + ')';
-    $('#frTabReq').setAttribute('aria-pressed', FR.tab === 'req' ? 'true' : 'false');
-    $('#frTabFr').setAttribute('aria-pressed', FR.tab === 'fr' ? 'true' : 'false');
+    var friends = frAll(), cnt = frCount();
+    var tf = $('#frTabFr'), tr = $('#frTabReq');
+    tf.textContent = 'Amis'; tf.appendChild(el('span', 'frp-n', String(friends.length)));
+    tr.textContent = 'Demandes'; if (cnt) tr.appendChild(el('span', 'frp-n hot', String(cnt)));
+    tf.setAttribute('aria-selected', FR.tab === 'fr' ? 'true' : 'false');
+    tr.setAttribute('aria-selected', FR.tab === 'req' ? 'true' : 'false');
+    $('#frSearch').hidden = FR.tab !== 'fr' || friends.length < 6;
     if (FR.tab === 'req') {
-      box.appendChild(el('p', 'frh', 'Demandes d’amis'));
-      if (!inc.length && !out.length) box.appendChild(el('p', 'frempty', 'Aucune demande d’ami.'));
+      frSuggest();
+      if (inc.length) frHead(box, 'Demandes reçues', inc.length);
       inc.forEach(function (f) {
         var u = frOther(f), nm = frNameOf(f);
-        box.appendChild(frRow(u, nm, 'veut devenir ton ami', '', false, [
-          ['Accepter', function () { frDoc(u).update({ status: 'accepted', ats: Date.now() }).catch(frFail); }],
-          ['Refuser', function () { frDoc(u).delete().catch(frFail); }]
-        ], function () { frDlg.close(); openUserCard(u, nm); }));
+        box.appendChild(frRow({ uid: u, name: nm, sub: 'veut devenir ton ami', btns: [
+          ['Confirmer', function () { frDoc(u).update().catch(frFail); }, 'pri', 'Vous êtes amis 🎉'],
+          ['Supprimer', function () { frDoc(u).delete().catch(frFail); }, '']
+        ] }));
       });
-      out.forEach(function (f) {
-        var u = frOther(f), nm = frNameOf(f);
-        box.appendChild(frRow(u, nm, 'Demande envoyée', '', false, [['Annuler', function () { frDoc(u).delete().catch(frFail); }]], function () { frDlg.close(); openUserCard(u, nm); }));
-      });
-      box.appendChild(el('p', 'frh', 'Invitations par message'));
-      if (!inv.length) box.appendChild(el('p', 'frempty', 'Aucune invitation par message.'));
+      if (inv.length) frHead(box, 'Invitations par message', inv.length);
       inv.forEach(function (c) {
         var u = c.invite.from, nm = (c.names && c.names[u]) || 'Inconnu', n = c.invite.n || 1;
-        var row = frRow(u, nm, 'Invitation par message · ' + n + ' message' + (n > 1 ? 's' : ''), 'inv', false, [
-          ['Accepter', function () { respondInv(c, true); }],
-          ['Refuser', function () { respondInv(c, false); }]
-        ], function () { frDlg.close(); openChat(u, nm); });
-        if (c.lastText) row.querySelector('.frmid').appendChild(el('small', '', '« ' + c.lastText + ' »'));
-        box.appendChild(row);
+        box.appendChild(frRow({ uid: u, name: nm, sub: n + ' message' + (n > 1 ? 's' : ''), subCls: 'inv', extra: c.lastText ? '« ' + c.lastText + ' »' : '',
+          onMain: function () { frDlg.close(); openChat(u, nm); },
+          btns: [['Accepter', function () { respondInv(c, true); }, 'pri', 'Accepté ✓'], ['Refuser', function () { respondInv(c, false); }, '']] }));
       });
-    } else {
-      frSuggest();
-      var on = friends.filter(function (f) { return isOnline(frOther(f)); }), off = friends.filter(function (f) { return !isOnline(frOther(f)); });
-      if (!friends.length) box.appendChild(el('p', 'frempty', 'Aucun ami pour l’instant. Cherche un nom d’utilisateur pour en ajouter.'));
-      function add(f, o) { var u = frOther(f), nm = frNameOf(f); box.appendChild(frRow(u, nm, (isClose(u) ? '⭐ Ami proche · ' : '') + (o ? 'En ligne' : 'Hors ligne'), '', o, [], function () { frDlg.close(); openChat(u, nm); })); }
-      var bds = bdayList();
-      var bt = bds.filter(function (x) { return x.days === 0; }), bn = bds.filter(function (x) { return x.days > 0 && x.days <= 30; });
-      if (bt.length) { box.appendChild(el('p', 'frh', 'Anniversaires aujourd’hui')); bt.forEach(function (x) { box.appendChild(frRow(x.u, x.nm, '🎂 Aujourd’hui', '', false, [], function () { frDlg.close(); openChat(x.u, x.nm); })); }); }
-      if (bn.length) { box.appendChild(el('p', 'frh', 'Prochains anniversaires')); bn.forEach(function (x) { box.appendChild(frRow(x.u, x.nm, bdayLabel(x.md) + ' · dans ' + x.days + ' j', '', false, [], function () { frDlg.close(); openChat(x.u, x.nm); })); }); }
-      if (on.length) { box.appendChild(el('p', 'frh', 'Connectés (' + on.length + ')')); on.forEach(function (f) { add(f, true); }); }
-      if (off.length) { box.appendChild(el('p', 'frh', on.length ? 'Hors ligne' : 'Tous les amis')); off.forEach(function (f) { add(f, false); }); }
+      if (!inc.length && !inv.length) frEmpty(box, 'Aucune demande', 'Quand quelqu’un voudra devenir ton ami, tu le verras ici.');
+      if (out.length) frHead(box, 'Demandes envoyées', out.length);
+      out.forEach(function (f) {
+        var u = frOther(f), nm = frNameOf(f);
+        box.appendChild(frRow({ uid: u, name: nm, sub: 'En attente de réponse', btns: [['Annuler la demande', function () { frDoc(u).delete().catch(frFail); }, '']] }));
+      });
       var sg = frIsCertMe() ? [] : FR.sug.items.filter(function (x) { return !frWith(x.uid); });
       if (sg.length) {
-        box.appendChild(el('p', 'frh', 'Suggestions'));
+        frHead(box, 'Personnes que tu connais peut-être');
         sg.forEach(function (x) {
-          box.appendChild(frRow(x.uid, x.name, x.mutual + ' amis en commun', '', false, [['Ajouter', function () {
-            var names = {}; names[state.me] = state.username; names[x.uid] = x.name;
-            frDoc(x.uid).set({ members: [state.me, x.uid], names: names, from: state.me, status: 'pending', ts: Date.now() }).catch(frFail);
-          }]], function () { frDlg.close(); openUserCard(x.uid, x.name); }));
+          box.appendChild(frRow({ uid: x.uid, name: x.name, sub: x.mutual + ' amis en commun', btns: [['Ajouter', function () {
+            frDoc(x.uid).set().catch(frFail);
+          }, 'pri', 'Demande envoyée']] }));
+        });
+      }
+    } else {
+      var q = (FR.q || '').trim().toLowerCase();
+      var list = friends.filter(function (f) { return !q || frNameOf(f).toLowerCase().indexOf(q) > -1; });
+      list.sort(function (a, b) {
+        var oa = isOnline(frOther(a)) ? 1 : 0, ob = isOnline(frOther(b)) ? 1 : 0;
+        return ob - oa || frNameOf(a).localeCompare(frNameOf(b));
+      });
+      if (!friends.length) frEmpty(box, 'Pas encore d’amis', 'Cherche un nom d’utilisateur avec la loupe pour en ajouter.');
+      else if (!list.length) frEmpty(box, 'Personne trouvé', 'Aucun ami ne correspond à « ' + FR.q + ' ».');
+      else {
+        var bds = q ? [] : bdayList().filter(function (x) { return x.days === 0; });
+        bds.forEach(function (x) { box.appendChild(frRow({ uid: x.u, name: x.nm, sub: '🎂 C’est son anniversaire aujourd’hui', subCls: 'inv', msg: true })); });
+        var on = list.filter(function (f) { return isOnline(frOther(f)); });
+        frHead(box, list.length + ' ami' + (list.length > 1 ? 's' : '') + (on.length ? ' · ' + on.length + ' en ligne' : ''));
+        list.forEach(function (f) {
+          var u = frOther(f), nm = frNameOf(f), o = isOnline(u);
+          box.appendChild(frRow({ uid: u, name: nm, sub: (isClose(u) ? '⭐ Ami proche · ' : '') + (o ? 'En ligne' : 'Hors ligne'), subCls: o ? 'on' : '', online: o, msg: true }));
         });
       }
     }
+    box.scrollTop = keep;
   }
-  function frOpen(tab) { FR.tab = tab; $('#frErr').hidden = true; frRender(); frDlg.showModal(); }
+  function frOpen(tab) {
+    FR.tab = tab; FR.q = ''; $('#frQ').value = ''; $('#frErr').hidden = true; frRender(); frDlg.showModal();
+  }
+  /* la « boîte » est maintenant une page plein écran : on lui redonne l'API d'un <dialog> */
+  (function () {
+    var t = 0;
+    frDlg.open = false;
+    frDlg.showModal = function () {
+      clearTimeout(t); frDlg.hidden = false; frDlg.open = true; frDlg.classList.remove('out');
+      document.documentElement.classList.add('frp-open');
+      requestAnimationFrame(function () { requestAnimationFrame(function () { frDlg.classList.add('in'); }); });
+    };
+    frDlg.close = function () {
+      if (!frDlg.open) return;
+      frDlg.open = false; frDlg.classList.remove('in'); frDlg.classList.add('out');
+      document.documentElement.classList.remove('frp-open');
+      t = setTimeout(function () { frDlg.hidden = true; frDlg.classList.remove('out'); }, 240);
+    };
+  })();
   $('#openFriends').addEventListener('click', function () { frOpen('fr'); });
   $('#openReqs').addEventListener('click', function () { frOpen('req'); });
   $('#frTabReq').addEventListener('click', function () { FR.tab = 'req'; frRender(); });
   $('#frTabFr').addEventListener('click', function () { FR.tab = 'fr'; frRender(); });
+  $('#frQ').addEventListener('input', function () { FR.q = this.value; frRender(); });
   $('#frClose').addEventListener('click', function () { frDlg.close(); });
-  setInterval(function () { if (!document.hidden && frDlg.open) frRender(); }, 20000);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && frDlg.open) frDlg.close(); });
+  setInterval(function () { if (!document.hidden && frDlg.open && document.activeElement !== $('#frQ')) frRender(); }, 20000);
 
   /* barre d'outils : menu ⋮, filtre « non lus », recherche d'une personne */
   var kmenu = $('#kmenu'), menuBtn = $('#menuBtn');
@@ -1233,7 +1292,7 @@ window.__uandiApp = function () {
   $('#ucMsgSend').addEventListener('click', ucInvite);
   $('#ucMsgIn').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); ucInvite(); } });
   $('#ucClose').addEventListener('click', function () { ucDlg.close(); });
-  [frDlg, ucDlg].forEach(function (d) { d.addEventListener('click', function (e) { if (e.target === d) d.close(); }); });
+  [ucDlg].forEach(function (d) { d.addEventListener('click', function (e) { if (e.target === d) d.close(); }); });
 
 
 

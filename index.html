@@ -131,6 +131,7 @@ if(v&&v!==c&&tr!==v){try{sessionStorage.setItem('uandi-maj',v)}catch(e){}locatio
 <link rel="stylesheet" href="css/accueil-fluide.css?v=759">
 <link rel="stylesheet" href="css/fluide.css?v=759">
 <link rel="stylesheet" href="css/messagerie-v2.css?v=759">
+<link rel="stylesheet" href="css/amis.css">
 <link rel="stylesheet" href="css/recherche.css?v=759">
 <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap"></noscript>
@@ -573,12 +574,16 @@ if(v&&v!==c&&tr!==v){try{sessionStorage.setItem('uandi-maj',v)}catch(e){}locatio
   <div class="pfrow"><button class="ghost" id="ucClose" type="button">Fermer</button></div>
 </dialog>
 
-<dialog class="sheet" id="frDlg" aria-label="Amis et demandes">
-  <div class="frtabs"><button class="ghost" id="frTabReq" type="button">Demandes</button><button class="ghost" id="frTabFr" type="button">Amis</button></div>
-  <div class="frbody" id="frBody"></div>
-  <p class="err" id="frErr" hidden></p>
-  <div class="pfrow"><button class="ghost" id="frClose" type="button">Fermer</button></div>
-</dialog>
+<div class="frp" id="frDlg" hidden role="dialog" aria-label="Amis et demandes">
+  <div class="frp-top">
+    <button class="frp-back" id="frClose" type="button" aria-label="Retour"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="frp-title">Amis</div>
+  </div>
+  <div class="frp-tabs" role="tablist"><button id="frTabFr" type="button" role="tab" aria-selected="true">Amis</button><button id="frTabReq" type="button" role="tab" aria-selected="false">Demandes</button></div>
+  <div class="frp-search" id="frSearch" hidden><input id="frQ" type="search" placeholder="Rechercher un ami" autocomplete="off" aria-label="Rechercher un ami"></div>
+  <div class="frp-body" id="frBody"></div>
+  <p class="err frp-err" id="frErr" hidden></p>
+</div>
 
 <dialog class="sheet" id="noteView" aria-label="Note">
   <div class="pfrow">
@@ -1020,6 +1025,7 @@ if(v&&v!==c&&tr!==v){try{sessionStorage.setItem('uandi-maj',v)}catch(e){}locatio
 <script src="js/tirer.js?v=759" defer></script>
 <script src="js/swipe-onglets.js?v=759" defer></script>
 <script src="js/perf.js?v=759" defer></script>
+<script src="js/surprises.js" defer></script>
 <script src="js/recherche.js?v=759" defer></script>
 <script src="js/lark-music.js?v=759"></script>
 <script src="js/jeux.js?v=759" defer></script>

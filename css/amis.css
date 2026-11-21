@@ -1,0 +1,65 @@
+/* X'enify — page Amis / Demandes en plein écran (comme Facebook). Suit les couleurs du thème. */
+.frp { position: fixed; inset: 0; z-index: 70; display: flex; flex-direction: column; background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); padding-top: env(safe-area-inset-top, 0px); transform: translateX(100%); transition: transform .24s cubic-bezier(.2,.8,.2,1); }
+.frp[hidden] { display: none; }
+.frp.in { transform: none; }
+.frp.out { transform: translateX(100%); }
+html.frp-open body { overflow: hidden; }
+.frp-top { display: flex; align-items: center; gap: 4px; padding: 6px 12px 2px 4px; }
+.frp-back { flex: none; width: 44px; height: 44px; display: grid; place-items: center; border: 0; background: none; color: var(--ink); border-radius: 50%; }
+.frp-back:active { background: var(--raise, rgba(128,128,128,.18)); }
+.frp-title { font-family: "Sora", var(--font-display); font-size: 1.35rem; font-weight: 800; letter-spacing: -.02em; }
+.frp-tabs { display: flex; gap: 8px; padding: 8px 14px 6px; }
+.frp-tabs button { flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; height: 40px; border: 0; border-radius: 20px; font: inherit; font-weight: 700; font-size: .95rem;
+  background: var(--raise, rgba(128,128,128,.16)); color: var(--ink); transition: background .2s, color .2s; }
+.frp-tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+.frp-n { min-width: 20px; height: 20px; padding: 0 6px; display: inline-grid; place-items: center; border-radius: 10px; font-size: .72rem; font-weight: 800; background: rgba(128,128,128,.28); color: inherit; }
+.frp-tabs button[aria-selected="true"] .frp-n { background: rgba(0,0,0,.22); }
+.frp-n.hot { background: #ff3b5c; color: #fff; }
+.frp-search { padding: 6px 14px 2px; }
+.frp-search[hidden] { display: none; }
+.frp-search input { width: 100%; box-sizing: border-box; height: 42px; padding: 0 16px; border: 1.5px solid transparent; border-radius: 21px; outline: 0; font: inherit; font-size: .98rem;
+  background: var(--raise, rgba(128,128,128,.16)); color: var(--ink); -webkit-appearance: none; appearance: none; }
+.frp-search input:focus { border-color: color-mix(in srgb, var(--accent) 60%, transparent); }
+.frp-search input::-webkit-search-cancel-button { display: none; }
+.frp-body { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 0 0 calc(28px + env(safe-area-inset-bottom, 0px)); -webkit-overflow-scrolling: touch; }
+.frp-h { display: flex; align-items: baseline; gap: 8px; padding: 16px 18px 4px; }
+.frp-h h2 { margin: 0; font-family: "Sora", var(--font-display); font-size: 1.02rem; font-weight: 700; letter-spacing: -.01em; }
+.frp-h span { color: var(--muted); font-weight: 700; font-size: .9rem; }
+.frp-row { display: flex; align-items: center; gap: 2px; padding: 0 12px 0 6px; min-height: 70px; transition: opacity .3s, transform .3s; }
+.frp-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 13px; padding: 8px; border: 0; background: none; color: inherit; font: inherit; text-align: left; border-radius: 16px; }
+.frp-main:active { background: var(--raise, rgba(128,128,128,.16)); }
+.frp-av { position: relative; flex: none; display: block; }
+.frp-av .avatar { width: 54px; height: 54px; font-size: 1.15rem; }
+.frp-dot { position: absolute; right: 0; bottom: 1px; width: 14px; height: 14px; border-radius: 50%; background: #2fbf71; border: 2.5px solid var(--bg); }
+.frp-mid { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.frp-mid b { display: flex; align-items: center; gap: 6px; font-size: 1.02rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.frp-mid small { color: var(--muted); font-size: .86rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.frp-mid small.on { color: #2fbf71; font-weight: 600; }
+.frp-mid small.inv { color: var(--accent); font-weight: 600; }
+.frp-mid em { font-style: normal; color: var(--muted); font-size: .84rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.frp-msg { flex: none; width: 42px; height: 42px; display: grid; place-items: center; border: 0; border-radius: 50%; background: var(--raise, rgba(128,128,128,.16)); color: var(--ink); }
+.frp-msg:active { background: var(--raise2, rgba(128,128,128,.3)); transform: scale(.92); }
+/* demande : photo + deux gros boutons, comme sur Facebook */
+.frp-row.card { flex-wrap: wrap; padding-bottom: 10px; }
+.frp-row.card .frp-av .avatar { width: 64px; height: 64px; font-size: 1.3rem; }
+.frp-acts { flex: 0 0 100%; display: flex; gap: 8px; padding: 0 8px 0 84px; box-sizing: border-box; }
+.frp-btn { flex: 1; height: 38px; border: 0; border-radius: 10px; font: inherit; font-weight: 700; font-size: .92rem; background: var(--raise, rgba(128,128,128,.2)); color: var(--ink); }
+.frp-btn.pri { background: var(--accent); color: var(--accent-ink); }
+.frp-btn:active { transform: scale(.97); }
+.frp-btn:disabled { opacity: .85; }
+.frp-row.done .frp-btn:not(.pri) { display: none; }
+.frp-row.done .frp-btn.pri { background: var(--raise, rgba(128,128,128,.2)); color: var(--ink); }
+.frp-row.gone { opacity: 0; transform: translateX(28px); }
+.frp-empty { padding: 64px 28px; text-align: center; color: var(--muted); }
+.frp-empty strong { display: block; color: var(--ink); font-family: "Sora", var(--font-display); font-size: 1.05rem; margin-bottom: 6px; }
+.frp-empty p { margin: 0; font-size: .92rem; line-height: 1.5; }
+.frp-err { margin: 0; padding: 10px 18px; }
+@media (prefers-reduced-motion: reduce) { .frp, .frp-row { transition: none; } }
+
+/* petites surprises (confettis, emojis, bonjour) */
+.xfx { position: fixed; left: 0; top: 0; z-index: 99999; pointer-events: none; will-change: transform, opacity; line-height: 1; user-select: none; }
+.xfx-hello { position: fixed; left: 50%; top: calc(14px + env(safe-area-inset-top, 0px)); z-index: 99998; transform: translate(-50%, -140%); opacity: 0;
+  padding: 11px 18px; border-radius: 22px; background: var(--ink); color: var(--bg); font-size: .92rem; font-weight: 600; box-shadow: 0 8px 28px rgba(0,0,0,.35);
+  transition: transform .5s cubic-bezier(.3,1.5,.5,1), opacity .3s; pointer-events: none; white-space: nowrap; max-width: 92vw; overflow: hidden; text-overflow: ellipsis; }
+.xfx-hello.on { transform: translate(-50%, 0); opacity: 1; }
